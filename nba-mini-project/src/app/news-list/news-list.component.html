@@ -1,0 +1,21 @@
+<div class="news-container">
+    <!-- 顶部标题和标签栏 -->
+    <div class="header-container">
+      <h1 class="news-title">NBA 新聞</h1>
+    </div>
+    <!-- 新闻卡片列表 -->
+    <div class="news-list">
+      <mat-card class="news-card" *ngFor="let news of newsList">
+        <div class="card-content">
+          <div class="text-content">
+            <mat-card-title>{{news.title}}</mat-card-title>
+            <mat-card-subtitle>{{news.time}}</mat-card-subtitle>
+            <mat-card-content>
+              <p>{{news.summary}}</p>
+            </mat-card-content>
+            <img mat-card-image [src]="news.image_url" [alt]="news.title">
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </div>

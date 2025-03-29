@@ -1,0 +1,48 @@
+.card-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: #0a2544
+  }
+  
+  .text-content {
+    padding: 16px;
+    display: flex;
+    justify-content: center; /* 主軸居中對齊 */
+    align-items: center; /* 交叉軸居中對齊 */
+  }
+  
+  /* 標题样式 */
+  mat-card-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  mat-card-subtitle {
+    color: #666;
+    margin-bottom: 12px;
+  }
+  
+  /* 图片样式 */
+  img[mat-card-image] {
+    width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+    margin: 0 0 16px 0;
+  }
+  
+  /* 内容段落样式 */
+  mat-card-content p {
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  /* 卡片整体样式 */
+  .news-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
