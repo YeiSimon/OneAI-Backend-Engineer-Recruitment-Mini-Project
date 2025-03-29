@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Table, UniqueConstraint, JSON, Index
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, LargeBinary, UniqueConstraint, JSON, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -25,6 +26,7 @@ class News(Base):
     tags = relationship("Tag", secondary="news_tags", back_populates="news")
     metrics = relationship("NewsMetrics", back_populates="news", uselist=False)
     entities = relationship("Entity", secondary="news_entities", back_populates="news")
+    image = relationship("NewsImage", back_populates="news", uselist=False)
     
     # Indexes
     __table_args__ = (
@@ -32,8 +34,7 @@ class News(Base):
         Index("idx_news_category_id", "category_id"),
         Index("idx_news_is_featured", "is_featured"),
     )
-
-
+    
 class Category(Base):
     __tablename__ = "categories"
     
@@ -112,3 +113,15 @@ class NewsEntity(Base):
     __table_args__ = (
         UniqueConstraint('news_id', 'entity_id', 'role', name='uq_news_entity_role'),
     )
+
+class NewsImage(Base):
+    __tablename__ = "news_images"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    news_id = Column(Integer, ForeignKey("news.id"), nullable=False)
+    image_data = Column(LargeBinary, nullable=False)
+    mime_type = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+    
+    # 關聯
+    news = relationship("News", back_populates="image")

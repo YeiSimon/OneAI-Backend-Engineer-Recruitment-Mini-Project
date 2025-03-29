@@ -2,6 +2,17 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
+class NewsImageBase(BaseModel):
+    mime_type: str
+
+class NewsImage(NewsImageBase):
+    id: int
+    news_id: int
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+        
 class CategoryBase(BaseModel):
     name: str
     slug: str
@@ -115,7 +126,7 @@ class News(NewsBase):
     category: Category
     tags: List[Tag] = []
     metrics: Optional[NewsMetrics] = None
-    
+    image_url: Optional[str] = None
     class Config:
         orm_mode = True
 
@@ -135,3 +146,4 @@ class NewsListResponse(BaseModel):
     page: int
     size: int
     pages: int
+

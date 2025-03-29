@@ -1,12 +1,25 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Response, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import crud, models, schemas
 from .database import get_db
 
 app = FastAPI(title="NBA 新聞網站 API", description="NBA 新聞網站的 API 端點")
+
+origins = [
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -21,6 +34,12 @@ async def read_news(
     """獲取新聞列表"""
     news = crud.get_recent_news(db, limit=limit)
     total = db.query(models.News).count()
+    
+      # 設置圖片 URL
+    for item in news:
+        if hasattr(item, 'image') and item.image:
+            item.image_url = f"/news/{item.id}/image"
+
     return {
         "items": news,
         "total": total,
@@ -118,7 +137,59 @@ async def create_news(
         category_name=news.category_name,
         tags=news.tags
     )
+
+@app.post("/news/{news_id}/image", response_model=schemas.News)
+async def upload_news_image(
+    news_id: int, 
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """為指定新聞上傳圖片"""
+    # 檢查新聞是否存在
+    news = db.query(models.News).filter(models.News.id == news_id).first()
+    if not news:
+        raise HTTPException(status_code=404, detail="找不到新聞")
     
+    # 讀取圖片數據
+    image_data = await image.read()
+    mime_type = image.content_type or "image/jpeg"
+    
+    # 檢查是否已有圖片
+    existing_image = db.query(models.NewsImage).filter(models.NewsImage.news_id == news_id).first()
+    
+    if existing_image:
+        # 更新現有圖片
+        existing_image.image_data = image_data
+        existing_image.mime_type = mime_type
+    else:
+        # 創建新圖片
+        news_image = models.NewsImage(
+            news_id=news_id,
+            image_data=image_data,
+            mime_type=mime_type,
+            created_at = datetime.now()
+        )
+        db.add(news_image)
+    
+    db.commit()
+    
+    # 返回更新後的新聞
+    news = db.query(models.News).filter(models.News.id == news_id).first()
+    news.image_url = f"/news/{news_id}/image"
+    return news
+
+@app.get("/news/{news_id}/image")
+async def get_news_image(news_id: int, db: Session = Depends(get_db)):
+    """獲取新聞圖片"""
+    news_image = db.query(models.NewsImage).filter(models.NewsImage.news_id == news_id).first()
+    if not news_image:
+        raise HTTPException(status_code=404, detail="圖片不存在")
+    
+    return Response(
+        content=news_image.image_data, 
+        media_type=news_image.mime_type
+    )
+
 @app.post("/news/{news_id}/entity/", response_model=schemas.News)
 async def add_entity(
     news_id: int,
