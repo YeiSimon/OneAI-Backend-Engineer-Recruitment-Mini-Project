@@ -2,11 +2,11 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from slugify import slugify
 from . import models
-from typing import List, Optional, Dict, Any
-
+from typing import List, Optional, Dict
 
 def add_news(db: Session, title: str, content: str, summary: str, 
-             published_at: datetime, category_name: str, tags: List[str] = None):
+             published_at: datetime, category_name: str, tags: List[str] = None, 
+             ):
     """向資料庫添加新聞"""
     # 處理分類
     category = db.query(models.Category).filter(models.Category.name == category_name).first()
@@ -14,6 +14,7 @@ def add_news(db: Session, title: str, content: str, summary: str,
         category = models.Category(name=category_name, slug=slugify(category_name))
         db.add(category)
         db.flush()
+    # add image
     
     # 創建新聞
     news = models.News(
@@ -22,7 +23,8 @@ def add_news(db: Session, title: str, content: str, summary: str,
         content=content,
         summary=summary,
         published_at=published_at,
-        category_id=category.id
+        category_id=category.id,
+        
     )
     db.add(news)
     db.flush()
@@ -45,7 +47,6 @@ def add_news(db: Session, title: str, content: str, summary: str,
     
     db.commit()
     return news
-
 
 def get_hot_news(db: Session, limit: int = 5):
     """獲取熱門新聞"""
