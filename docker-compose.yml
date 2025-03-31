@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: nba_news_db
+    environment:
+      POSTGRES_DB: nba_news_db
+      POSTGRES_USER: nba_news_user
+      POSTGRES_PASSWORD: nba_news_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nba_news_user -d nba_news_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: nba_news_web
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://nba_news_user:nba_news_password@db:5432/nba_news_db
+  nba-mini-project:
+    build:
+      context: ./frontend # Path to your Angular project directory
+      dockerfile: Dockerfile # Dockerfile within the frontend directory
+    container_name: nba_news_frontend
+    ports:
+      - "4200:80" # Map host port 4200 to container port 80 (Nginx)
+    depends_on:
+      - web # Ensures the backend is running before the frontend
+    environment:
+      - API_BASE_URL=http://web:8000 # Tells Angular where to find the backend
+volumes:
+  postgres_data:
