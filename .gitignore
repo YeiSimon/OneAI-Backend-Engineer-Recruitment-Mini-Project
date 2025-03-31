@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.python-version
+
+# Virtual Environment
+venv/
+ENV/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+/scraper/venv_bot
+# Logs
+logs/
+*.log
+
+# 環境變數
+.env
+.env.local
+
+# 快取和暫存檔案
+.cache/
+.pytest_cache/
+__pytest__/
+.coverage
+htmlcov/
+.hypothesis/
